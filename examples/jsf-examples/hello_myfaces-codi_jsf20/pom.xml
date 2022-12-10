@@ -1,0 +1,687 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.myfaces.extensions.cdi.examples</groupId>
+        <artifactId>jsf-examples-project</artifactId>
+        <version>1.0.7-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.apache.myfaces.extensions.cdi.examples</groupId>
+    <artifactId>hello-myfaces-codi-jsf20-example</artifactId>
+    <version>1.0.7-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>MyFaces Extensions-CDI Hello-CODI for JSF 2.0 Example</name>
+
+    <properties>
+        <cargo.context>cargo-test</cargo.context>
+        <cargo.port>9090</cargo.port> <!-- use port 9090 in order to prevent port-already-in-use on hudson -->
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.bundles</groupId>
+            <artifactId>myfaces-extcdi-bundle-jsf20</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- or use the modules you need individually.
+        ATTENTION: some application servers have bugs concerning the deployment of individual modules.
+        In this example we use the all-in-one jar to avoid problems with the jee6 profile due to the mentioned
+        application server issues.-->
+        <!--
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.core</groupId>
+            <artifactId>myfaces-extcdi-core-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.core</groupId>
+            <artifactId>myfaces-extcdi-core-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.modules</groupId>
+            <artifactId>myfaces-extcdi-jsf20-module-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.modules</groupId>
+            <artifactId>myfaces-extcdi-jsf20-module-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.modules</groupId>
+            <artifactId>myfaces-extcdi-message-module-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.modules</groupId>
+            <artifactId>myfaces-extcdi-message-module-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        -->
+
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+            <artifactId>myfaces-extcdi-junit-support-module</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+            <artifactId>myfaces-extcdi-cargo-support-module</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+            <artifactId>myfaces-extcdi-owb-support-module</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+            <artifactId>myfaces-extcdi-jsf-support-module</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <inherited>true</inherited>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- override settings -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7.1</version>
+                <configuration>
+                    <parallel>methods</parallel>
+                    <threadCount>10</threadCount>
+                    <properties>
+                        <property>
+                            <name>junit</name>
+                            <value>true</value>
+                        </property>
+                    </properties>
+                    <excludes>
+                        <!-- we only have cargo test cases -->
+                        <exclude>**/*Test*.java</exclude>
+                        <exclude>**/Abstract*.java</exclude>
+                        <exclude>**/*$*.java</exclude>
+                    </excludes>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>2.7.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+        </plugins>
+    </build>
+    
+    <profiles>
+        <profile>
+            <id>owb-myfaces</id>
+            <activation>
+                <property>
+                    <name>!environment</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-api</artifactId>
+                    <version>${myfaces2.version.current}</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-impl</artifactId>
+                    <version>${myfaces2.version.current}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <!-- CDI (OpenWebBeans) -->
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jcdi_1.0_spec</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-impl</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-spi</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-jsf</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-resource</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-web</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <!-- required for tomcat -->
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jta_1.1_spec</artifactId>
+                    <version>1.1.1</version>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-interceptor_1.1_spec</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-validation_1.0_spec</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jpa_1.0_spec</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                    <version>1.6.1</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                    <version>2.5</version>
+                    <scope>provided</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>javax.el</groupId>
+                    <artifactId>el-api</artifactId>
+                    <version>1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>owb-mojarra</id>
+            <activation>
+                <property>
+                    <name>environment</name>
+                    <value>owb-mojarra</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-api</artifactId>
+                    <version>${myfaces2.version.current}</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-impl</artifactId>
+                    <version>${myfaces2.version.current}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <!-- CDI (OpenWebBeans) -->
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jcdi_1.0_spec</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-impl</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-spi</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-jsf</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-resource</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans</groupId>
+                    <artifactId>openwebbeans-web</artifactId>
+                    <version>${owb.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <!-- required for tomcat -->
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jta_1.1_spec</artifactId>
+                    <version>1.1.1</version>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-interceptor_1.1_spec</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-validation_1.0_spec</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                    <version>1.6.1</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                    <version>2.5</version>
+                    <scope>provided</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>javax.el</groupId>
+                    <artifactId>el-api</artifactId>
+                    <version>1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>jee-container</id>
+            <activation>
+                <property>
+                    <name>environment</name>
+                    <value>jee6</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-web-api</artifactId>
+                    <version>6.0</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>java.net2</id>
+                    <name>Repository hosting the jee6 artifacts</name>
+                    <url>https://download.java.net/maven/2</url>
+                </repository>
+            </repositories>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.1.1</version>
+                        <configuration>
+                            <webXml>${basedir}/src/main/webapp/WEB-INF/jee-web.xml</webXml>
+                            <warSourceExcludes>**/jee-web.xml</warSourceExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mojarra</id>
+            <activation>
+                <property>
+                    <name>jsf</name>
+                    <value>mojarra</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sun.faces</groupId>
+                    <artifactId>jsf-api</artifactId>
+                    <version>${mojarra2.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.sun.faces</groupId>
+                    <artifactId>jsf-impl</artifactId>
+                    <version>${mojarra2.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>maven2-repository.dev.java.net 2</id>
+                    <name>Java.net Repository for Maven 2</name>
+                    <url>https://download.java.net/maven/2</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <profile>
+            <id>jettyConfig</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!--This plugin allows to run the example using mvn jetty:run -->
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>maven-jetty-plugin</artifactId>
+                        <version>6.1.8</version>
+                        <configuration>
+                            <scanIntervalSeconds>10</scanIntervalSeconds>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>cargo-examples</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!--This plugin allows to run the example using mvn jetty:run -->
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${maven.jetty.plugin.version}</version>
+                        <configuration>
+                            <scanIntervalSeconds>10</scanIntervalSeconds>
+                            <webAppConfig>
+                                <contextPath>/${cargo.context}</contextPath>
+                            </webAppConfig>
+                            <connectors>
+                                <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                                    <port>${cargo.port}</port>
+                                    <maxIdleTime>60000</maxIdleTime>
+                                </connector>
+                            </connectors>
+                        </configuration>
+                    </plugin>
+
+                    <!-- cargo test -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.0.4</version>
+                        <configuration>
+                            <container>
+                                <containerId>jetty7x</containerId>
+                                <type>embedded</type>
+                            </container>
+
+                            <!-- do NOT wait for Ctrl + C to stop -->
+                            <!-- NOTE: set this to true to enable manual testing -->
+                            <wait>false</wait>
+
+                            <configuration>
+                                <properties>
+                                    <cargo.servlet.port>${cargo.port}</cargo.servlet.port>
+                                </properties>
+
+                                <deployables>
+                                    <deployable>
+                                        <groupId>org.apache.myfaces.extensions.cdi.examples</groupId>
+                                        <artifactId>hello-myfaces-codi-jsf20-example</artifactId>
+                                        <type>war</type>
+                                        <properties>
+                                            <context>${cargo.context}</context>
+                                        </properties>
+                                    </deployable>
+                                </deployables>
+                            </configuration>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-container</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-container</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-failsafe-plugin</artifactId>
+                       <version>2.7.2</version>
+                       <executions>
+                           <execution>
+                               <id>htmlunit-integration-tests</id>
+                               <phase>integration-test</phase>
+                               <goals>
+                                   <goal>integration-test</goal>
+                               </goals>
+                               <configuration>
+                                   <includes>
+                                       <include>
+                                           **/*TestCase.java
+                                       </include>
+                                   </includes>
+                                   <skip>false</skip>
+                                   <testNGArtifactName>none:none</testNGArtifactName>
+                                   <systemPropertyVariables>
+                                       <!-- pass properties to JUnit -->
+                                       <cargo.context>${cargo.context}</cargo.context>
+                                       <cargo.port>${cargo.port}</cargo.port>
+                                   </systemPropertyVariables>
+                               </configuration>
+                           </execution>
+                           <execution>
+                               <id>verify</id>
+                               <goals>
+                                   <goal>verify</goal>
+                               </goals>
+                           </execution>
+                       </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+            <dependencies>
+                <!-- test dependencies -->
+                <dependency>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>net.sourceforge.htmlunit</groupId>
+                    <artifactId>htmlunit</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+                    <artifactId>myfaces-extcdi-junit-support-module</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+                    <artifactId>myfaces-extcdi-cargo-support-module</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+                    <artifactId>myfaces-extcdi-owb-support-module</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.myfaces.extensions.cdi.test</groupId>
+                    <artifactId>myfaces-extcdi-jsf-support-module</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans.test</groupId>
+                    <artifactId>cditest</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.openwebbeans.test</groupId>
+                    <artifactId>cditest-owb</artifactId>
+                    <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.myfaces.test</groupId>
+                    <artifactId>myfaces-test12</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+		    <!-- just for starting jetty for debugging the junit tests:
+		    mvn clean jetty:run-exploded -Pdebug-cargo-examples -Dmaven.test.skip=true
+		    in the ide enable the cargo-examples and test-infrastructure maven-profile -> start jetty -> run test-case
+		    (tested with intellij 9)
+		    -->
+            <id>debug-cargo-examples</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${maven.jetty.plugin.version}</version>
+                        <configuration>
+                            <scanIntervalSeconds>10</scanIntervalSeconds>
+                            <webAppConfig>
+                                <contextPath>/${cargo.context}</contextPath>
+                            </webAppConfig>
+                            <connectors>
+                                <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                                    <port>${cargo.port}</port>
+                                    <maxIdleTime>60000</maxIdleTime>
+                                </connector>
+                            </connectors>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
+</project>
